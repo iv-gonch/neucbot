@@ -15,14 +15,13 @@ import matplotlib.pyplot as plt # type: ignore
 
 import sys
 import os
-sys.path.insert(0, 'UI/Scripts/')
 import re
 import subprocess
 import shutil
 import math
-from .Scripts import parseENSDF as ensdf
-from .Scripts import getNaturalIsotopes as gni
-from .Scripts import getAbundance as isoabund
+from Scripts import getNaturalIsotopes as gni
+from Scripts import parseENSDF as ensdf
+from Scripts import getAbundance as isoabund
 
 
 class constants:
@@ -219,7 +218,7 @@ def calcStoppingPower(e_alpha_MeV, mat_comp):
 
     # Then, for each element, get the stopping power at this alpha energy
     for mat in mat_comp_reduced:
-        spDir = 'UI/Data/StoppingPowers/'
+        spDir = './Data/StoppingPowers/'
         spFile = spDir + mat.lower() + '.dat'
         spf = open(spFile)
 
@@ -819,7 +818,18 @@ def run_alpha(alpha_list, mat_comp, e_alpha_step):
         print('\t',x,'{0:.2e}'.format(xsects[x]), file = constants.ofile)
     print('# Integral of spectrum = ', '{0:.2e}'.format(integrate(newspec)), " n/decay", file = constants.ofile)
     for e in sorted(newspec):
-        print(e, '{0:.2e}'.format(newspec[e]), file = constants.ofile) #will always be 0 after a certain point?
+        formatted_e = str(e).rjust(6)  
+
+        max_length=10
+        formatted_spec = f"{newspec[e]:.{max_length}g}"
+        if len(formatted_spec) > max_length:
+            mantissa, exponent = formatted_spec.split('e')
+            mantissa_length = max_length - len(exponent) - 2
+            mantissa = mantissa[:mantissa_length]
+            
+            formatted_spec = f"{mantissa}e{exponent}"
+        print(f'{formatted_e}', formatted_spec, file = constants.ofile)
+        # print(f'{formatted_e}', '{0:.2e}'.format(newspec[e]), file = constants.ofile) # will always be 0 after a certain point?
     return xsects,newspec
 
 
